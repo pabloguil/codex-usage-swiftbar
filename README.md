@@ -71,3 +71,6 @@ The plugin reads only local Codex session files from:
 
 It does not send usage data anywhere.
 
+## License
+
+MIT License.
