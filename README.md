@@ -43,6 +43,17 @@ SwiftBar will show two menu bar items:
 
 Both menu items open the same detailed menu with the two limits grouped into separate sections.
 
+## Menu Bar Display
+
+Open the plugin menu and use `Settings` to choose how it appears in the menu bar:
+
+- `Two indicators`: one item for the 5-hour limit and one item for the weekly limit
+- `Combined`: both limits in one menu bar item
+- `Only 5-hour limit`
+- `Only weekly limit`
+
+The setting is saved locally and can be changed at any time from the plugin menu.
+
 ## Optional Settings
 
 Force the display language:
@@ -52,7 +63,16 @@ CODEX_LIMITS_LANG=es
 CODEX_LIMITS_LANG=en
 ```
 
-Force the display mode:
+Force the saved display preference:
+
+```sh
+CODEX_LIMITS_DISPLAY=separate
+CODEX_LIMITS_DISPLAY=combined
+CODEX_LIMITS_DISPLAY=five
+CODEX_LIMITS_DISPLAY=weekly
+```
+
+Force a single plugin instance mode:
 
 ```sh
 CODEX_LIMITS_MODE=five

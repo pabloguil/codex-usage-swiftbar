@@ -14,5 +14,5 @@ plugin = Path(__file__).resolve().with_name("codex-limits.1m.py")
 if not plugin.exists():
     plugin = Path.home() / "Library/Application Support/SwiftBar/Plugins/codex-limits.1m.py"
 env = dict(os.environ)
-env["CODEX_LIMITS_MODE"] = "weekly"
+env["CODEX_LIMITS_SLOT"] = "weekly"
 raise SystemExit(subprocess.run([sys.executable, str(plugin)], env=env).returncode)

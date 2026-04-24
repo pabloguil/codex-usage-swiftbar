@@ -46,6 +46,7 @@ TEXT = {
         "credits_no_extra": "no extra credits",
         "credits_unlimited": "unlimited",
         "data_updated": "Data updated {minutes} min ago",
+        "display_mode": "Menu bar display",
         "estimated_start": "Estimated start",
         "five_hour_limit": "5-hour limit",
         "folder_checked": "Folder checked",
@@ -54,6 +55,8 @@ TEXT = {
         "normal": "normal",
         "official_usage": "Open official usage",
         "open_codex_usage": "Open Codex usage",
+        "only_five": "Only 5-hour limit",
+        "only_weekly": "Only weekly limit",
         "pace": "Pace",
         "pace_extra": ", pace {pace}",
         "plan": "Plan",
@@ -64,6 +67,9 @@ TEXT = {
         "reset": "Reset",
         "reviewed_folder": "I cannot find Codex limit data.",
         "source": "Source",
+        "settings": "Settings",
+        "show_combined": "Combined",
+        "show_separate": "Two indicators",
         "time_left": "Time left",
         "used": "Used",
         "used_vs": "{used:.0f}% used vs {expected:.0f}% proportional, {sign}{diff:.0f} pts",
@@ -82,6 +88,7 @@ TEXT = {
         "credits_no_extra": "sin créditos extra",
         "credits_unlimited": "ilimitados",
         "data_updated": "Dato actualizado hace {minutes} min",
+        "display_mode": "Vista en la barra",
         "estimated_start": "Inicio estimado",
         "five_hour_limit": "Límite de 5 horas",
         "folder_checked": "Carpeta revisada",
@@ -90,6 +97,8 @@ TEXT = {
         "normal": "normal",
         "official_usage": "Abrir uso oficial",
         "open_codex_usage": "Abrir uso de Codex",
+        "only_five": "Solo límite de 5 horas",
+        "only_weekly": "Solo límite semanal",
         "pace": "Ritmo",
         "pace_extra": ", ritmo {pace}",
         "plan": "Plan",
@@ -100,6 +109,9 @@ TEXT = {
         "reset": "Reinicio",
         "reviewed_folder": "No encuentro datos de límites en Codex.",
         "source": "Fuente",
+        "settings": "Ajustes",
+        "show_combined": "Combinado",
+        "show_separate": "Dos indicadores",
         "time_left": "Tiempo restante",
         "used": "Usado",
         "used_vs": "{used:.0f}% usado vs {expected:.0f}% proporcional, {sign}{diff:.0f} pts",
@@ -534,6 +546,33 @@ def write_state(state):
         pass
 
 
+def configured_display_mode():
+    explicit = os.environ.get("CODEX_LIMITS_DISPLAY", "").strip().lower()
+    if explicit in {"separate", "five", "weekly", "combined"}:
+        return explicit
+
+    mode = str(read_state().get("display_mode", "separate")).strip().lower()
+    return mode if mode in {"separate", "five", "weekly", "combined"} else "separate"
+
+
+def handle_action():
+    if len(sys.argv) < 3 or sys.argv[1] != "set-mode":
+        return False
+
+    mode = sys.argv[2].strip().lower()
+    if mode not in {"separate", "five", "weekly", "combined"}:
+        return True
+
+    state = read_state()
+    state["display_mode"] = mode
+    write_state(state)
+    try:
+        subprocess.run(["open", "-g", "swiftbar://refreshallplugins"], timeout=5, check=False)
+    except Exception:
+        pass
+    return True
+
+
 def notify_if_needed(severity, five_hour, weekly):
     if severity not in {"warning", "critical"}:
         return
@@ -604,12 +643,37 @@ def plugin_mode():
     explicit = os.environ.get("CODEX_LIMITS_MODE", "").strip().lower()
     if explicit in {"five", "weekly", "combined"}:
         return explicit
-    name = Path(sys.argv[0]).name.lower()
-    if "weekly" in name or "sem" in name:
-        return "weekly"
-    if "combined" in name:
-        return "combined"
-    return "five"
+
+    display_mode = configured_display_mode()
+    slot = os.environ.get("CODEX_LIMITS_SLOT", "").strip().lower()
+    if not slot:
+        name = Path(sys.argv[0]).name.lower()
+        slot = "weekly" if "weekly" in name or "sem" in name else "primary"
+
+    if slot == "weekly":
+        return "weekly" if display_mode == "separate" else "hidden"
+
+    if display_mode == "separate":
+        return "five"
+    return display_mode
+
+
+def print_settings_section():
+    current = configured_display_mode()
+    options = [
+        ("separate", t("show_separate")),
+        ("combined", t("show_combined")),
+        ("five", t("only_five")),
+        ("weekly", t("only_weekly")),
+    ]
+
+    print("---")
+    print(f"{t('settings')} | color=white font=Helvetica-Bold")
+    print(t("display_mode"))
+    script = str(Path(__file__).resolve()).replace('"', '\\"')
+    for mode, label in options:
+        mark = "✓ " if mode == current else ""
+        print(f'{mark}{label} | bash="{script}" param1=set-mode param2={mode} terminal=false refresh=true')
 
 
 def title_for_mode(mode, five_hour, weekly):
@@ -623,12 +687,17 @@ def title_for_mode(mode, five_hour, weekly):
 
 def main():
     mode = plugin_mode()
+    if mode == "hidden":
+        return 0
+
     rate_limits, timestamp, source_file = find_latest_rate_limits()
     if not rate_limits:
         print(f"{t('codex_no_data')} | color=gray")
         print("---")
         print(t("reviewed_folder"))
         print(f"{t('folder_checked')}: {SESSIONS_DIR}")
+        print_settings_section()
+        print("---")
         print(f"{t('open_codex_usage')} | href={USAGE_URL}")
         return 0
 
@@ -673,6 +742,7 @@ def main():
     if source_file:
         print(f"{t('source')}: {source_file.name}")
 
+    print_settings_section()
     print("---")
     print(f"{t('official_usage')} | href={USAGE_URL}")
     print(f"{t('pricing')} | href={PRICING_URL}")
@@ -682,6 +752,8 @@ def main():
 
 if __name__ == "__main__":
     try:
+        if handle_action():
+            raise SystemExit(0)
         raise SystemExit(main())
     except Exception as exc:
         print(f"{t('codex_error')} | color=red")
