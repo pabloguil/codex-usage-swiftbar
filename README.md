@@ -36,7 +36,9 @@ Copy these two files into your SwiftBar plugins folder:
 - `plugins/codex-limits.1m.py`
 - `plugins/codex-limits-weekly.1m.py`
 
-SwiftBar will show two menu bar items:
+By default, SwiftBar shows one combined menu bar item with both limits.
+
+If you also copy `codex-limits-weekly.1m.py`, you can switch to two separate menu bar items from the plugin settings:
 
 - `5h`: 5-hour Codex limit
 - `Sem` or `Week`: weekly Codex limit

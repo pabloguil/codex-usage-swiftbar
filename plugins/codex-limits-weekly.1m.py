@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # <xbar.title>Codex weekly limit</xbar.title>
-# <xbar.version>1.1.0</xbar.version>
+# <xbar.version>v1.2.0</xbar.version>
 # <xbar.author>Pablo Guil</xbar.author>
 # <xbar.author.github>pabloguil</xbar.author.github>
 # <xbar.desc>Shows the weekly Codex limit as a separate menu bar item.</xbar.desc>
 # <xbar.dependencies>python3</xbar.dependencies>
+# <xbar.abouturl>https://github.com/pabloguil/codex-usage-swiftbar</xbar.abouturl>
 import os
 import subprocess
 import sys

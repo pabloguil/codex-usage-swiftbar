@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # <xbar.title>Codex limits</xbar.title>
-# <xbar.version>1.1.0</xbar.version>
+# <xbar.version>v1.2.0</xbar.version>
 # <xbar.author>Pablo Guil</xbar.author>
 # <xbar.author.github>pabloguil</xbar.author.github>
 # <xbar.desc>Shows Codex usage limits from local Codex session data.</xbar.desc>
 # <xbar.dependencies>python3</xbar.dependencies>
+# <xbar.abouturl>https://github.com/pabloguil/codex-usage-swiftbar</xbar.abouturl>
 
 import datetime as dt
 import base64
@@ -551,7 +552,7 @@ def configured_display_mode():
     if explicit in {"separate", "five", "weekly", "combined"}:
         return explicit
 
-    mode = str(read_state().get("display_mode", "separate")).strip().lower()
+    mode = str(read_state().get("display_mode", "combined")).strip().lower()
     return mode if mode in {"separate", "five", "weekly", "combined"} else "separate"
 
 
